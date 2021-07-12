@@ -41,7 +41,7 @@ class T_CNN(object):
     self.df_dim = 64
     self.checkpoint_dir = checkpoint_dir
     self.sample_dir = sample_dir
-    self.vgg_dir='vgg_pretrained/imagenet-vgg-verydeep-19.mat'
+    self.vgg_dir='/content/drive/MyDrive/vgg_pretrained/imagenet-vgg-verydeep-19.mat'
     self.CONTENT_LAYER = 'relu5_4'
     self.build_model()
 
@@ -74,17 +74,17 @@ class T_CNN(object):
     
   def train(self, config):
     if config.is_train:     
-      data_train_list = prepare_data(self.sess, dataset="input_train")
-      data_wb_train_list = prepare_data(self.sess, dataset="input_wb_train")
-      data_ce_train_list = prepare_data(self.sess, dataset="input_ce_train")
-      data_gc_train_list = prepare_data(self.sess, dataset="input_gc_train")
-      image_train_list = prepare_data(self.sess, dataset="gt_train")
+      data_train_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_train")
+      data_wb_train_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_wb_train")
+      data_ce_train_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_ce_train")
+      data_gc_train_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_gc_train")
+      image_train_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/gt_train")
 
-      data_test_list = prepare_data(self.sess, dataset="input_test")
-      data_wb_test_list = prepare_data(self.sess, dataset="input_wb_test")
-      data_ce_test_list = prepare_data(self.sess, dataset="input_ce_test")
-      data_gc_test_list = prepare_data(self.sess, dataset="input_gc_test")
-      image_test_list = prepare_data(self.sess, dataset="gt_test")
+      data_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_test")
+      data_wb_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_wb_test")
+      data_ce_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_ce_test")
+      data_gc_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_gc_test")
+      image_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/gt_test")
 
       seed = 568
       np.random.seed(seed)
@@ -99,11 +99,11 @@ class T_CNN(object):
       np.random.shuffle(image_train_list)
 
     else:
-      data_test_list = prepare_data(self.sess, dataset="input_test")
-      data_wb_test_list = prepare_data(self.sess, dataset="input_wb_test")
-      data_ce_test_list = prepare_data(self.sess, dataset="input_ce_test")
-      data_gc_test_list = prepare_data(self.sess, dataset="input_gc_test")
-      image_test_list = prepare_data(self.sess, dataset="gt_test")
+      data_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_test")
+      data_wb_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_wb_test")
+      data_ce_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_ce_test")
+      data_gc_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/input_gc_test")
+      image_test_list = prepare_data(self.sess, dataset="/content/drive/MyDrive/waternetDataSets/gt_test")
 
 
 
