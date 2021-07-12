@@ -12,7 +12,7 @@ from PIL import Image  # for loading images as YCbCr format
 import scipy.misc
 import scipy.ndimage
 import numpy as np
-
+import cv2
 import tensorflow as tf
 
 FLAGS = tf.app.flags.FLAGS
@@ -43,9 +43,9 @@ def imread(path, is_grayscale=False):
   """
 
   if is_grayscale:
-    return scipy.misc.imread(path, flatten=True).astype(np.float)
+    return cv2.imread(path, flatten=True).astype(np.float)
   else:
-    return scipy.misc.imread(path).astype(np.float)
+    return cv2.imread(path).astype(np.float)
 
     
 def imsave(image, path):
