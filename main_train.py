@@ -5,7 +5,7 @@ from utils import (
   prepare_data
 )
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import pprint
 import os
