@@ -11,8 +11,8 @@ import pprint
 import os
 
 flags = tf.app.flags
-flags.DEFINE_integer("epoch", 400, "Number of epoch [120]")
-flags.DEFINE_integer("batch_size", 16, "The size of batch images [128]")
+flags.DEFINE_integer("epoch", 5, "Number of epoch [120]")
+flags.DEFINE_integer("batch_size", 128, "The size of batch images [128]")
 flags.DEFINE_integer("image_height", 112, "The size of image to use [230]")
 flags.DEFINE_integer("image_width", 112, "The size of image to use [310]")
 flags.DEFINE_integer("label_height", 112 ,"The size of label to produce [230]")
