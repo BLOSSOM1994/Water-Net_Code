@@ -8,7 +8,7 @@ import os
 import matplotlib.pyplot as plt
 import re
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import scipy.io as scio
 from ops import *
 import vgg
