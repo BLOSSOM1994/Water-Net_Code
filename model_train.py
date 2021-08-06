@@ -12,7 +12,7 @@ import tensorflow.compat.v1 as tf
 import scipy.io as scio
 from ops import *
 import vgg
-
+import tensorflow.contrib.slim as slim
 class T_CNN(object):
 
   def __init__(self, 
@@ -219,40 +219,92 @@ class T_CNN(object):
             print(loss)
             self.save(config.checkpoint_dir, counter)
 
+            
+    def lrelu(x):
+        return tf.maximum(x*0.2,x)
+
+  def upsample_and_concat(x1, x2, output_channels, in_channels):
+
+        pool_size = 2
+        deconv_filter = tf.Variable(tf.truncated_normal( [pool_size, pool_size, output_channels, in_channels], stddev=0.02))
+        deconv = tf.nn.conv2d_transpose(x1, deconv_filter, tf.shape(x2) , strides=[1, pool_size, pool_size, 1] )
+
+        deconv_output =  tf.concat([deconv, x2],3)
+        deconv_output.set_shape([None, None, None, output_channels*2])
+
+        return deconv_output
+            
 
       
   def model(self):
 
     with tf.variable_scope("main_branch") as scope3: 
+#Unet
+        conb0 = tf.concat(axis = 3, values = [self.images,self.images_wb,self.images_ce,self.images_gc])
+        conv1=slim.conv2d(conb0,16,[3,3], rate=1, activation_fn=lrelu,scope='g_conv1_1')
+        conv1=slim.conv2d(conv1,16,[3,3], rate=1, activation_fn=lrelu,scope='g_conv1_2')
+        pool1=slim.conv2d(conv1,16,[3,3], stride=2, rate=1, activation_fn=lrelu, scope='pooling1' )
 
-      conb0 = tf.concat(axis = 3, values = [self.images,self.images_wb,self.images_ce,self.images_gc]) 
-      conv_wb1 = tf.nn.relu(conv2d(conb0, 16,128, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_1"))
-      conv_wb2 = tf.nn.relu(conv2d(conv_wb1, 128,128, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_2"))
-      conv_wb3 = tf.nn.relu(conv2d(conv_wb2, 128,128, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_3"))
-      conv_wb4 = tf.nn.relu(conv2d(conv_wb3, 128,64, k_h=1, k_w=1, d_h=1, d_w=1,name="conv2wb_4"))
-      conv_wb5 = tf.nn.relu(conv2d(conv_wb4, 64,64, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_5"))
-      conv_wb6 = tf.nn.relu(conv2d(conv_wb5, 64,64, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_6"))
-      conv_wb7 = tf.nn.relu(conv2d(conv_wb6, 64,64, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_7"))
+        conv2=slim.conv2d(pool1,32,[3,3], rate=1, activation_fn=lrelu,scope='g_conv2_1')
+        conv2=slim.conv2d(conv2,32,[3,3], rate=1, activation_fn=lrelu,scope='g_conv2_2')
+        pool2=slim.conv2d(conv2,32,[3,3], stride=2, rate=1, activation_fn=lrelu, scope='pooling2' )
 
-      conv_wb77 =tf.nn.sigmoid(conv2d(conv_wb7, 64,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_77"))
+        conv3=slim.conv2d(pool2,64,[3,3], rate=1, activation_fn=lrelu,scope='g_conv3_1')
+        conv3=slim.conv2d(conv3,64,[3,3], rate=1, activation_fn=lrelu,scope='g_conv3_2')
+        pool3=slim.conv2d(conv3,64,[3,3], stride=2, rate=1, activation_fn=lrelu, scope='pooling3' )
 
-      conb00 = tf.concat(axis = 3, values = [self.images,self.images_wb]) 
-      conv_wb9 = tf.nn.relu(conv2d(conb00, 3,32, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_9"))
-      conv_wb10 = tf.nn.relu(conv2d(conv_wb9, 32,32, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_10"))
-      wb1 =tf.nn.relu(conv2d(conv_wb10, 32,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_11"))
 
-      conb11 = tf.concat(axis = 3, values = [self.images,self.images_ce]) 
-      conv_wb99 = tf.nn.relu(conv2d(conb11, 3,32, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_99"))
-      conv_wb100 = tf.nn.relu(conv2d(conv_wb99, 32,32, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_100"))
-      ce1 =tf.nn.relu(conv2d(conv_wb100, 32,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_111"))
+        conv4=slim.conv2d(pool3,128,[3,3], rate=1, activation_fn=lrelu,scope='g_conv4_1')
+        conv4=slim.conv2d(conv4,128,[3,3], rate=1, activation_fn=lrelu,scope='g_conv4_2')
+        pool4=slim.conv2d(conv4,128,[3,3], stride=2, rate=1, activation_fn=lrelu, scope='pooling4' )
 
-      conb111 = tf.concat(axis = 3, values = [self.images,self.images_gc]) 
-      conv_wb999 = tf.nn.relu(conv2d(conb111, 3,32, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_999"))
-      conv_wb1000 = tf.nn.relu(conv2d(conv_wb999, 32,32, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_1000"))
-      gc1 =tf.nn.relu(conv2d(conv_wb1000, 32,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_1111"))
 
-      weight_wb,weight_ce,weight_gc=tf.split(conv_wb77,3,3)
-      output1=tf.add(tf.add(tf.multiply(wb1,weight_wb),tf.multiply(ce1,weight_ce)),tf.multiply(gc1,weight_gc))
+        conv5=slim.conv2d(pool4,256,[3,3], rate=1, activation_fn=lrelu,scope='g_conv5_1')
+        conv_global = tf.reduce_mean(conv5,axis=[1,2])
+        conv_dense = tf.layers.dense(conv_global,units=128,activation=tf.nn.relu)
+        feature = tf.expand_dims(conv_dense,axis=1)
+        feature = tf.expand_dims(feature,axis=2)
+        ones = tf.zeros(shape=tf.shape(conv4))
+        global_feature = feature + ones
+
+        up6 =  tf.concat([conv4, global_feature], axis=3)
+        conv6=slim.conv2d(up6,  128,[3,3], rate=1, activation_fn=lrelu,scope='g_conv6_1')
+        conv6=slim.conv2d(conv6,128,[3,3], rate=1, activation_fn=lrelu,scope='g_conv6_2')
+
+        up7 =  upsample_and_concat( conv6, conv3, 64, 128  )
+        conv7=slim.conv2d(up7,  64,[3,3], rate=1, activation_fn=lrelu,scope='g_conv7_1')
+        conv7=slim.conv2d(conv7,64,[3,3], rate=1, activation_fn=lrelu,scope='g_conv7_2')
+
+        up8 =  upsample_and_concat( conv7, conv2, 32, 64 )
+        conv8=slim.conv2d(up8,  32,[3,3], rate=1, activation_fn=lrelu,scope='g_conv8_1')
+        conv8=slim.conv2d(conv8,32,[3,3], rate=1, activation_fn=lrelu,scope='g_conv8_2')
+
+        up9 =  upsample_and_concat( conv8, conv1, 16, 32 )
+        conv9=slim.conv2d(up9,  16,[3,3], rate=1, activation_fn=lrelu,scope='g_conv9_1')
+        conv9=slim.conv2d(conv9,16,[3,3], rate=1, activation_fn=lrelu,scope='g_conv9_2')
+
+        conv9 = conb0 * conv9
+        deconv_filter = tf.Variable(tf.truncated_normal([2, 2, 3, 16], stddev=0.02))
+        conv10 = tf.nn.conv2d_transpose(conv9, deconv_filter, tf.shape(input), strides=[1, 2, 2, 1])
+        conv_wb77 = slim.conv2d(conv10, 3, [3, 3],rate=1,activation_fn=nn.tanh,scope='out') * 0.58 + 0.52
+  #TFU Row+Wb      
+        conb00 = tf.concat(axis = 3, values = [self.images,self.images_wb]) 
+        conv_wb9 = tf.nn.relu(conv2d(conb00, 3,32, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_9"))
+        conv_wb10 = tf.nn.relu(conv2d(conv_wb9, 32,32, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_10"))
+        wb1 =tf.nn.relu(conv2d(conv_wb10, 32,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_11"))
+  #TFU Row+Ce
+        conb11 = tf.concat(axis = 3, values = [self.images,self.images_ce]) 
+        conv_wb99 = tf.nn.relu(conv2d(conb11, 3,32, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_99"))
+        conv_wb100 = tf.nn.relu(conv2d(conv_wb99, 32,32, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_100"))
+        ce1 =tf.nn.relu(conv2d(conv_wb100, 32,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_111"))
+  #TFU Row+Gc
+        conb111 = tf.concat(axis = 3, values = [self.images,self.images_gc]) 
+        conv_wb999 = tf.nn.relu(conv2d(conb111, 3,32, k_h=7, k_w=7, d_h=1, d_w=1,name="conv2wb_999"))
+        conv_wb1000 = tf.nn.relu(conv2d(conv_wb999, 32,32, k_h=5, k_w=5, d_h=1, d_w=1,name="conv2wb_1000"))
+        gc1 =tf.nn.relu(conv2d(conv_wb1000, 32,3, k_h=3, k_w=3, d_h=1, d_w=1,name="conv2wb_1111"))
+  #Output
+        weight_wb,weight_ce,weight_gc=tf.split(conv_wb77,3,3)
+        output1=tf.add(tf.add(tf.multiply(wb1,weight_wb),tf.multiply(ce1,weight_ce)),tf.multiply(gc1,weight_gc))
 
 
     return output1
